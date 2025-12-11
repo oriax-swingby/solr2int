@@ -1,0 +1,11 @@
+# Solr2Int Exploit Dependencies
+# Python 3.10+ required
+
+# HTTP Requests
+requests>=2.28.0
+
+# NTLM Authentication (optional, for Neo-reGeorg)
+requests-ntlm>=1.2.0
+
+# curl_cffi (optional, for Neo-reGeorg advanced features)
+# curl_cffi>=0.5.0

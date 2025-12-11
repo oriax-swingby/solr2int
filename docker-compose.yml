@@ -1,0 +1,162 @@
+services:
+  dmz-web:
+    image: solr2int-nginx-ssh
+    build:
+      context: ./dmz-gateway
+      args:
+        NGINX_PWD: "vpB6RUo@L+3NVMk0"
+    container_name: dmz-web
+    depends_on:
+      app-was:
+        condition: service_started
+    ports:
+      - "80:80"
+    volumes:
+      - ./dmz-gateway/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      dmz-zone:
+        ipv4_address: 172.16.1.10
+      was-zone:
+        ipv4_address: 172.16.2.11
+
+  app-was:
+    build:
+      context: ./app-was
+      args:
+        TOMCAT_PWD: "f4Z@y0=zp6u2DEXL"
+    container_name: app-was
+    volumes:
+      - ./app-was/webapp:/usr/local/tomcat/webapps/ROOT
+    depends_on:
+      - search-solr
+      - db-server
+    networks:
+      was-zone:
+        ipv4_address: 172.16.2.10
+      search-zone:
+        ipv4_address: 172.16.3.11
+      db-zone:
+        ipv4_address: 172.16.4.11
+
+  search-solr:
+    image: solr2int-solr-ssh
+    build:
+      context: ./search-solr
+      args:
+        SOLR_PWD: "7hQa6YPIeao3-Mqb"
+    container_name: search-solr
+    command: solr-precreate techboard
+    environment:
+      SOLR_OPTS: "-Dsolr.autoCreateFields=true"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fs http://localhost:8983/solr/techboard/admin/ping || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    depends_on:
+      db-server:
+        condition: service_started
+    networks:
+      search-zone:
+        ipv4_address: 172.16.3.10
+        aliases:
+          - solr-backend
+      db-zone:
+        ipv4_address: 172.16.4.12
+      internal-zone:
+        ipv4_address: 172.16.5.10
+
+  db-server:
+    image: solr2int-mysql-ssh
+    build:
+      context: ./mysql-news
+      args:
+        MYSQL_PWD: "p6pdaI93VWr@8SV+"
+    container_name: db-server
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: "root_password_123"
+      MYSQL_DATABASE: "rediris"
+      MYSQL_USER: "news_user"
+      MYSQL_PASSWORD: "news_password"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password_123" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    volumes:
+      - ./mysql-news/mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      db-zone:
+        ipv4_address: 172.16.4.10
+        aliases:
+          - db-news
+
+  solr-init:
+    image: curlimages/curl
+    container_name: solr-init
+    depends_on:
+      search-solr:
+        condition: service_healthy
+      db-server:
+        condition: service_healthy
+    restart: on-failure
+    volumes:
+      - ./search-solr/init_data.sh:/init_data.sh
+    entrypoint: []
+    command: [ "/bin/sh", "/init_data.sh" ]
+    networks:
+      search-zone:
+        ipv4_address: 172.16.3.99
+
+  infra-monitor:
+    build:
+      context: ./infra-monitor
+    container_name: infra-monitor
+    depends_on:
+      - dmz-web
+    expose:
+      - "80"
+    networks:
+      internal-zone:
+        ipv4_address: 172.16.5.100
+      dmz-zone:
+        ipv4_address: 172.16.1.200
+      was-zone:
+        ipv4_address: 172.16.2.200
+      search-zone:
+        ipv4_address: 172.16.3.200
+      db-zone:
+        ipv4_address: 172.16.4.200
+    volumes:
+      - ./infra-monitor/site:/usr/share/nginx/html:ro
+      - ./infra-monitor/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+networks:
+  dmz-zone:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24
+  was-zone:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.2.0/24
+  search-zone:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.3.0/24
+  db-zone:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.4.0/24
+  internal-zone:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.5.0/24

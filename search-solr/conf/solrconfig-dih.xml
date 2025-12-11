@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Solr Data Import Handler Configuration -->
+<!-- This file will be merged into solrconfig.xml at runtime -->
+
+<config>
+    <!-- Data Import Handler -->
+    <requestHandler name="/dataimport" class="solr.DataImportHandler">
+        <lst name="defaults">
+            <str name="config">data-config.xml</str>
+        </lst>
+    </requestHandler>
+
+    <!-- DIH용 lib 디렉토리 경로 -->
+    <lib dir="/opt/solr/dist/" regex="solr-dataimporthandler-.*\.jar" />
+    <lib dir="/opt/solr/server/lib/" regex="mysql-connector-.*\.jar" />
+</config>

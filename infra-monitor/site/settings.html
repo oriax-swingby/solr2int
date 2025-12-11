@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecuWatch - 보안 정책 관리</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="background">
+        <div class="glass">
+            <header>
+                <div class="logo">
+                    <span class="logo-icon">◆</span>
+                    <span class="logo-text">Secu<span class="logo-accent">Watch</span></span>
+                </div>
+                <div class="header-actions">
+                    <span class="badge">Administrator</span>
+                    <a href="dashboard" class="btn ghost">← Dashboard</a>
+                    <a href="#" id="logoutBtn" class="btn ghost">로그아웃</a>
+                </div>
+            </header>
+
+            <section class="settings-page">
+                <div class="settings-header">
+                    <h1>보안 정책 관리</h1>
+                    <p class="lede">에이전트 인증, 접근 제어 및 계정 관리</p>
+                </div>
+
+                <div class="settings-grid">
+                    <!-- Password Change Section -->
+                    <article class="settings-card">
+                        <div class="card-top">
+                            <div>
+                                <p class="eyebrow">ACCOUNT SECURITY</p>
+                                <h2>관리자 비밀번호 변경</h2>
+                            </div>
+                        </div>
+                        <p class="settings-desc">
+                            SecuWatch 콘솔 관리자 계정의 비밀번호를 변경합니다.
+                            비밀번호는 8자 이상, 영문/숫자/특수문자를 포함해야 합니다.
+                        </p>
+                        <form id="passwordForm" class="settings-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="currentPassword">현재 비밀번호</label>
+                                    <input type="password" id="currentPassword" placeholder="Current Password" required>
+                                </div>
+                            </div>
+                            <div class="form-row two-col">
+                                <div class="form-group">
+                                    <label for="newPassword">새 비밀번호</label>
+                                    <input type="password" id="newPassword" placeholder="New Password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmPassword">새 비밀번호 확인</label>
+                                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn primary">비밀번호 변경</button>
+                            </div>
+                        </form>
+                        <div id="passwordMsg" class="form-message"></div>
+                    </article>
+
+                    <!-- IP ACL Section -->
+                    <article class="settings-card">
+                        <div class="card-top">
+                            <div>
+                                <p class="eyebrow">LOGIN ACCESS CONTROL</p>
+                                <h2>관리자 로그인 IP 제한</h2>
+                            </div>
+                            <span class="pill online">Active</span>
+                        </div>
+                        <p class="settings-desc">
+                            SecuWatch 관리 콘솔에 로그인 가능한 IP 주소를 관리합니다.
+                            아래 허용 목록에 없는 IP에서는 admin 계정으로 로그인할 수 없습니다.
+                        </p>
+
+                        <div class="acl-list">
+                            <div class="acl-header">
+                                <span>로그인 허용 IP</span>
+                                <span>설명</span>
+                                <span>작업</span>
+                            </div>
+                            <div class="acl-row">
+                                <span class="acl-ip">0.0.0.0/0</span>
+                                <span class="acl-desc">전체 허용</span>
+                                <span class="acl-action"><button class="btn-icon" disabled
+                                        title="기본 정책">⚠️</button></span>
+                            </div>
+                        </div>
+
+                        <form id="aclForm" class="acl-add-form">
+                            <div class="form-group">
+                                <input type="text" id="newAclIp"
+                                    placeholder="IP 주소 또는 CIDR (예: 192.168.1.100 또는 172.16.0.0/8)" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="newAclDesc" placeholder="설명 (선택사항)">
+                            </div>
+                            <button type="submit" class="btn ghost">+ 추가</button>
+                        </form>
+                    </article>
+
+                    <!-- Login History Section -->
+                    <article class="settings-card">
+                        <div class="card-top">
+                            <div>
+                                <p class="eyebrow">AUDIT LOG</p>
+                                <h2>최근 로그인 이력</h2>
+                            </div>
+                            <span class="pill">최근 10건</span>
+                        </div>
+                        <p class="settings-desc">
+                            SecuWatch 관리 콘솔에 대한 최근 로그인 시도 기록입니다.
+                        </p>
+                        <div class="log-panel compact">
+                            <div id="loginHistory" class="log-list">
+                                <p class="no-data">로그인 이력이 없습니다</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- SSH Key Section -->
+                    <article class="settings-card">
+                        <div class="card-top">
+                            <div>
+                                <p class="eyebrow">AUTHENTICATION</p>
+                                <h2>SSH 키 관리</h2>
+                            </div>
+                            <span class="pill online">Active</span>
+                        </div>
+                        <p class="settings-desc">
+                            SecuWatch 에이전트가 각 서버에 접속할 때 사용하는 SSH Private Key입니다.
+                            이 키로 모든 보호 대상 자산의 <code>monitor</code> 계정에 접속할 수 있습니다.
+                        </p>
+                        <div class="key-info">
+                            <div class="metric">
+                                <p class="label">암호화 방식</p>
+                                <p class="value">RSA 2048-bit</p>
+                            </div>
+                            <div class="metric">
+                                <p class="label">Agent 계정</p>
+                                <p class="value">monitor</p>
+                            </div>
+                            <div class="metric">
+                                <p class="label">등록된 자산</p>
+                                <p class="value">4개</p>
+                            </div>
+                        </div>
+                        <div class="key-download">
+                            <a href="keys/monitor_rsa.pem" download="monitor_rsa.pem" class="btn primary">
+                                SSH Private Key 다운로드
+                            </a>
+                            <p class="note">monitor_rsa.pem (RSA 2048-bit)</p>
+                        </div>
+                    </article>
+
+                    <!-- Server Access Guide -->
+                    <article class="settings-card">
+                        <div class="card-top">
+                            <div>
+                                <p class="eyebrow">REMOTE ACCESS</p>
+                                <h2>서버 접속 가이드</h2>
+                            </div>
+                        </div>
+                        <p class="settings-desc">
+                            다운로드한 SSH 키로 각 보호 대상 서버에 접속하는 방법입니다.
+                        </p>
+                        <div class="code-block">
+                            <code># 키 권한 설정 (최초 1회)
+chmod 600 monitor_rsa.pem
+
+# DB 서버 접속
+ssh -i monitor_rsa.pem monitor@172.16.4.10
+
+# Solr 서버 접속
+ssh -i monitor_rsa.pem monitor@172.16.3.10
+
+# WAS 서버 접속
+ssh -i monitor_rsa.pem monitor@172.16.2.10
+
+# DMZ 서버 접속
+ssh -i monitor_rsa.pem monitor@172.16.1.10</code>
+                        </div>
+                    </article>
+
+                    <!-- Security Warning -->
+                    <article class="settings-card warning-card">
+                        <div class="card-top">
+                            <div>
+                                <p class="eyebrow">SECURITY WARNING</p>
+                                <h2>보안 주의사항</h2>
+                            </div>
+                            <span class="severity-tag critical">Critical</span>
+                        </div>
+                        <ul class="warning-list">
+                            <li>이 SSH 키는 전체 인프라에 대한 접근 권한을 보유합니다</li>
+                            <li>키 파일을 외부에 유출하지 마십시오</li>
+                            <li>분실 시 즉시 보안팀(security@company.com)에 신고</li>
+                            <li>모든 접속 기록은 SIEM에 수집되어 감사됩니다</li>
+                            <li>비인가 사용 시 법적 책임을 물을 수 있습니다</li>
+                        </ul>
+                    </article>
+                </div>
+
+                <footer class="dashboard-footer">
+                    <span>SecuWatch Enterprise v3.2.1</span>
+                    <span>© 2024 SecuWatch Inc. All rights reserved.</span>
+                </footer>
+            </section>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>

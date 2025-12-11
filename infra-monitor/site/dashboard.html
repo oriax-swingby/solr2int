@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecuWatch - 대시보드</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="background">
+        <div class="glass">
+            <header>
+                <div class="logo">
+                    <span class="logo-icon">◆</span>
+                    <span class="logo-text">Secu<span class="logo-accent">Watch</span></span>
+                </div>
+                <div class="header-actions">
+                    <span class="badge">Administrator</span>
+                    <a href="settings" class="btn ghost settings-btn" title="설정">설정</a>
+                    <a href="#" id="logoutBtn" class="btn ghost">로그아웃</a>
+                </div>
+            </header>
+
+            <div class="system-status-bar">
+                <div class="status-indicator online">
+                    <span class="pulse"></span>
+                    <span>SYSTEM OPERATIONAL</span>
+                </div>
+                <div class="status-time">
+                    Last Scan: <span id="lastScan">방금 전</span>
+                </div>
+                <span class="tag">Protected Zone: 172.16.5.0/24</span>
+            </div>
+
+            <section class="hero">
+                <div class="hero-text">
+                    <p class="eyebrow">REAL-TIME MONITORING</p>
+                    <h1>위협 탐지 현황</h1>
+                    <p class="lede">
+                        SecuWatch 에이전트가 전체 인프라의 보안 상태를 실시간으로 모니터링하고 있습니다.
+                        모든 접속은 SSH 키 기반 인증으로 암호화됩니다.
+                    </p>
+                </div>
+                <div class="access-card">
+                    <div class="card-top">
+                        <div>
+                            <p class="eyebrow">THREAT LEVEL</p>
+                            <h2 class="threat-low">LOW</h2>
+                        </div>
+                        <span class="pill online">정상</span>
+                    </div>
+                    <div class="card-grid">
+                        <div class="metric">
+                            <p class="label">탐지된 위협</p>
+                            <p class="value">0건</p>
+                        </div>
+                        <div class="metric">
+                            <p class="label">차단된 공격</p>
+                            <p class="value">127건</p>
+                        </div>
+                        <div class="metric">
+                            <p class="label">보호중인 서버</p>
+                            <p class="value">4대</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="server-list">
+                <h2>보호 대상 자산</h2>
+                <div class="server-grid">
+                    <article class="server-card">
+                        <div class="server-header">
+                            <span class="dot green"></span>
+                            <h3>db-server</h3>
+                            <span class="severity-tag low">Safe</span>
+                        </div>
+                        <div class="server-info">
+                            <p><strong>IP:</strong> 172.16.4.10</p>
+                            <p><strong>서비스:</strong> MySQL 5.7</p>
+                            <p><strong>Agent:</strong> SecuWatch Agent v3.2.1</p>
+                            <p><strong>Zone:</strong> db-zone</p>
+                        </div>
+                        <div class="server-metrics">
+                            <span class="chip" data-metric="db-cpu">CPU: 12%</span>
+                            <span class="chip" data-metric="db-mem">MEM: 45%</span>
+                            <span class="chip">Connections: 23</span>
+                        </div>
+                    </article>
+
+                    <article class="server-card">
+                        <div class="server-header">
+                            <span class="dot green"></span>
+                            <h3>search-solr</h3>
+                            <span class="severity-tag low">Safe</span>
+                        </div>
+                        <div class="server-info">
+                            <p><strong>IP:</strong> 172.16.3.10</p>
+                            <p><strong>서비스:</strong> Apache Solr 8.2.0</p>
+                            <p><strong>Agent:</strong> SecuWatch Agent v3.2.1</p>
+                            <p><strong>Zone:</strong> search-zone</p>
+                        </div>
+                        <div class="server-metrics">
+                            <span class="chip" data-metric="solr-cpu">CPU: 34%</span>
+                            <span class="chip" data-metric="solr-mem">MEM: 62%</span>
+                            <span class="chip">Queries: 142/min</span>
+                        </div>
+                    </article>
+
+                    <article class="server-card">
+                        <div class="server-header">
+                            <span class="dot green"></span>
+                            <h3>app-was</h3>
+                            <span class="severity-tag low">Safe</span>
+                        </div>
+                        <div class="server-info">
+                            <p><strong>IP:</strong> 172.16.2.10</p>
+                            <p><strong>서비스:</strong> Tomcat 9.0</p>
+                            <p><strong>Agent:</strong> SecuWatch Agent v3.2.1</p>
+                            <p><strong>Zone:</strong> was-zone</p>
+                        </div>
+                        <div class="server-metrics">
+                            <span class="chip" data-metric="was-cpu">CPU: 8%</span>
+                            <span class="chip" data-metric="was-mem">MEM: 38%</span>
+                            <span class="chip">Sessions: 56</span>
+                        </div>
+                    </article>
+
+                    <article class="server-card">
+                        <div class="server-header">
+                            <span class="dot green"></span>
+                            <h3>dmz-web</h3>
+                            <span class="severity-tag low">Safe</span>
+                        </div>
+                        <div class="server-info">
+                            <p><strong>IP:</strong> 172.16.1.10</p>
+                            <p><strong>서비스:</strong> Nginx</p>
+                            <p><strong>Agent:</strong> SecuWatch Agent v3.2.1</p>
+                            <p><strong>Zone:</strong> dmz-zone</p>
+                        </div>
+                        <div class="server-metrics">
+                            <span class="chip" data-metric="dmz-cpu">CPU: 3%</span>
+                            <span class="chip" data-metric="dmz-mem">MEM: 15%</span>
+                            <span class="chip">RPS: 234</span>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="status-board">
+                <div class="status-card">
+                    <h3>보안 영역 (Security Zones)</h3>
+                    <div class="status-row">
+                        <span class="dot yellow"></span>
+                        <div>
+                            <p class="label">DMZ Zone</p>
+                            <p class="value">172.16.1.0/24 — 외부 노출</p>
+                        </div>
+                    </div>
+                    <div class="status-row">
+                        <span class="dot blue"></span>
+                        <div>
+                            <p class="label">WAS Zone</p>
+                            <p class="value">172.16.2.0/24</p>
+                        </div>
+                    </div>
+                    <div class="status-row">
+                        <span class="dot blue"></span>
+                        <div>
+                            <p class="label">Search Zone</p>
+                            <p class="value">172.16.3.0/24</p>
+                        </div>
+                    </div>
+                    <div class="status-row">
+                        <span class="dot green"></span>
+                        <div>
+                            <p class="label">DB Zone</p>
+                            <p class="value">172.16.4.0/24 — Restricted</p>
+                        </div>
+                    </div>
+                    <div class="status-row">
+                        <span class="dot green"></span>
+                        <div>
+                            <p class="label">Internal Zone</p>
+                            <p class="value">172.16.5.0/24 — 현재 위치</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="log-panel">
+                    <div class="log-head">
+                        <div>
+                            <p class="eyebrow">SECURITY EVENT LOG</p>
+                            <h3>실시간 이벤트</h3>
+                        </div>
+                        <span class="pill online">Live</span>
+                    </div>
+                    <div class="log-list" id="logList">
+                        <div class="log-row">
+                            <span class="log-time" data-log-time>08:45:12</span>
+                            <span class="log-msg">db-server SSH 인증 성공 (monitor@172.16.5.100)</span>
+                            <span class="log-tag ok">ALLOWED</span>
+                        </div>
+                        <div class="log-row">
+                            <span class="log-time" data-log-time>08:44:58</span>
+                            <span class="log-msg">search-solr 포트스캔 탐지 (192.168.1.x)</span>
+                            <span class="log-tag block">BLOCKED</span>
+                        </div>
+                        <div class="log-row">
+                            <span class="log-time" data-log-time>08:44:33</span>
+                            <span class="log-msg">app-was 비정상 요청 패턴 탐지</span>
+                            <span class="log-tag alert">ALERT</span>
+                        </div>
+                        <div class="log-row">
+                            <span class="log-time" data-log-time>08:44:10</span>
+                            <span class="log-msg">dmz-web SSL 인증서 갱신 완료</span>
+                            <span class="log-tag ok">INFO</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="dashboard-footer">
+                <span>SecuWatch Enterprise v3.2.1</span>
+                <span>© 2024 SecuWatch Inc. All rights reserved.</span>
+            </footer>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>

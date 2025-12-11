@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecuWatch 관리 콘솔</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="background">
+    <div class="glass login-container">
+      <div class="login-header">
+        <div class="logo">
+          <span class="logo-icon">◆</span>
+          <span class="logo-text">Secu<span class="logo-accent">Watch</span></span>
+        </div>
+        <p class="product-tagline">통합 보안관제 플랫폼</p>
+      </div>
+
+      <div class="alert-banner">
+        <div class="alert-dot"></div>
+        <div>
+          <p class="eyebrow">접근 제한 안내</p>
+          <strong>본 시스템은 인가된 관리자만 접근할 수 있습니다</strong>
+        </div>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="username">아이디</label>
+          <input type="text" id="username" name="username" placeholder="아이디를 입력하세요" autocomplete="off" required>
+        </div>
+        <div class="form-group">
+          <label for="password">비밀번호</label>
+          <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+        </div>
+        <div id="errorMsg" class="error-message"></div>
+        <button type="submit" class="btn primary full-width">로그인</button>
+      </form>
+
+      <div class="login-footer">
+        <div class="audit-notice">
+          <span class="audit-icon">●</span>
+          <span>접속 이력이 기록됩니다</span>
+        </div>
+        <div class="version-info">
+          <span class="tag">SecuWatch v3.2.1</span>
+          <span class="tag">내부망 전용</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+
+</html>
