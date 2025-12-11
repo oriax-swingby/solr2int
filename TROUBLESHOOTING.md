@@ -45,14 +45,26 @@ NeoGeorg is not ready
 Permission denied (publickey)
 ```
 
-**해결:**
+**해결 (Linux/Mac):**
 ```bash
-# 키 권한 확인
+# 키 권한 설정
 $ chmod 600 monitor_rsa.pem
 
 # 사용자명 확인 (monitor)
 $ proxychains ssh -i monitor_rsa.pem monitor@172.16.x.x
 ```
+
+**해결 (Windows):**
+```powershell
+# PowerShell에서 실행 (chmod 600과 동일한 효과)
+icacls .\monitor_rsa.pem /inheritance:r
+icacls .\monitor_rsa.pem /grant "$($env:USERNAME):R"
+
+# SSH 접속 (proxychains 대신 -o ProxyCommand 사용)
+ssh -o ProxyCommand="ncat --proxy 127.0.0.1:1080 --proxy-type socks5 %h %p" -i monitor_rsa.pem monitor@172.16.x.x
+```
+
+> **Windows 팁:** `ncat`은 [Nmap](https://nmap.org/download.html) 설치 시 포함됩니다.
 
 ---
 
