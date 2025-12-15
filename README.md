@@ -161,11 +161,15 @@ SOCKS5 프록시(기본 `127.0.0.1:1080`)를 설정하고 내부망에 접근합
 브라우저에 SOCKS5 프록시 설정:
 - **Host:** `127.0.0.1`
 - **Port:** `1080`
+```text
+1. Win + r => inetcpl.cpl
+2. 연결 - 설정 - 고급
+```
 
-또는 `proxychains` 사용:
+또는 `chromium` 사용:
 ```bash
-$ echo "socks5 127.0.0.1 1080" >> /etc/proxychains.conf
-$ proxychains curl http://172.16.5.100
+$ brew install --cask chromium
+$ chromium --proxy-server="socks5://127.0.0.1:1080"
 ```
 
 #### 5-2. Infra-Monitor 콘솔 접근
