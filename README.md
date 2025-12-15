@@ -135,7 +135,7 @@ $ python exploits/rce.py
 Config API를 통해 `params.resource.loader.enabled=true`로 설정하면 Velocity 템플릿으로 명령 실행이 가능해집니다.
 
 ### Step 3. 후속 공격 1단계(Memshell Injection)
-아웃바운드 연결이 차단된 환경이므로, **인 메모리 쉘**을 사용합니다.
+아웃바운드 연결이 차단 및 Embedded Java Web 환경이므로, **인 메모리 쉘**을 사용합니다.
 
 ```bash
 # JAR 파일을 Base64 청크로 분할 업로드
