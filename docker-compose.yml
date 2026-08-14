@@ -16,9 +16,9 @@ services:
       - ./dmz-gateway/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       dmz-zone:
-        ipv4_address: 172.16.1.10
+        ipv4_address: 172.16.10.10
       was-zone:
-        ipv4_address: 172.16.2.11
+        ipv4_address: 172.16.20.11
 
   app-was:
     build:
@@ -34,7 +34,7 @@ services:
       - db-server
     networks:
       was-zone:
-        ipv4_address: 172.16.2.10
+        ipv4_address: 172.16.20.10
       search-zone:
         ipv4_address: 172.16.3.11
       db-zone:
@@ -128,9 +128,9 @@ services:
       internal-zone:
         ipv4_address: 172.16.5.100
       dmz-zone:
-        ipv4_address: 172.16.1.200
+        ipv4_address: 172.16.10.200
       was-zone:
-        ipv4_address: 172.16.2.200
+        ipv4_address: 172.16.20.200
       search-zone:
         ipv4_address: 172.16.3.200
       db-zone:
@@ -144,12 +144,12 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.16.1.0/24
+        - subnet: 172.16.10.0/24
   was-zone:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.16.2.0/24
+        - subnet: 172.16.20.0/24
   search-zone:
     driver: bridge
     ipam:

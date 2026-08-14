@@ -8,8 +8,8 @@
 
 | Zone | 서비스 | IP | 역할 |
 |------|--------|--------|------|
-| **DMZ Zone** | dmz-web (Nginx) | 172.16.1.10 | 외부 트래픽을 받는 웹 서버 |
-| **WAS Zone** | app-was (Tomcat 9.0) | 172.16.2.10 | 사용자 서비스 제공, `proxy.jsp` Solr API 프록시 |
+| **DMZ Zone** | dmz-web (Nginx) | 172.16.10.10 | 외부 트래픽을 받는 웹 서버 |
+| **WAS Zone** | app-was (Tomcat 9.0) | 172.16.20.10 | 사용자 서비스 제공, `proxy.jsp` Solr API 프록시 |
 | **Search Zone** | search-solr (Solr 8.2.0) | 172.16.3.10 | 검색 엔진, **CVE-2019-17558** RCE 취약점 존재 |
 | **DB Zone** | db-server (MySQL 5.7) | 172.16.4.10 | 뉴스/지식포털 데이터 저장 |
 | **Internal Zone** | infra-monitor | 172.16.5.100 | 모니터링 솔루션 서버 |
@@ -25,16 +25,16 @@
                                     │ :80
                                     ▼
   ┌───────────────────────────────────────────────────────────────────┐
-  │  DMZ Zone (172.16.1.0/24)                                         │
+  │  DMZ Zone (172.16.10.0/24)                                         │
   │  ┌─────────────────────────────────────────────┐                  │
-  │  │ dmz-web (Nginx) - 172.16.1.10:80            │                  │
+  │  │ dmz-web (Nginx) - 172.16.10.10:80            │                  │
   │  └──────────────────────────┬──────────────────┘                  │
   └─────────────────────────────┼─────────────────────────────────────┘
                                 │
   ┌─────────────────────────────┼─────────────────────────────────────┐
-  │  WAS Zone (172.16.2.0/24)   |                                     │
+  │  WAS Zone (172.16.20.0/24)   |                                     │
   │  ┌──────────────────────────▼──────────────────┐                  │
-  │  │ app-was (Tomcat 9.0) - 172.16.2.10:8080     │                  │
+  │  │ app-was (Tomcat 9.0) - 172.16.20.10:8080     │                  │
   │  │ └─ proxy.jsp (SSRF)                         │                  │
   │  └───────┬──────────────────────────────┬──────┘                  │
   └──────────┼──────────────────────────────┼─────────────────────────┘
@@ -61,7 +61,7 @@
    ┌──────────────────────────────────────────────────────────────────┐
    │  Lateral Movement via Infra-Monitor                              │
    │  → DB (172.16.4.10), Solr (172.16.3.10),                         │
-   │    WAS (172.16.2.10), DMZ (172.16.1.10)                          │
+   │    WAS (172.16.20.10), DMZ (172.16.10.10)                          │
    └──────────────────────────────────────────────────────────────────┘
 
    ATTACK CHAIN:
@@ -211,10 +211,10 @@ $ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:5555 --proxy-type socks5 %h %p" -i
 $ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:5555 --proxy-type socks5 %h %p" -i monitor_rsa.pem monitor@172.16.3.10
 
 # WAS 서버
-$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:5555 --proxy-type socks5 %h %p" -i monitor_rsa.pem monitor@172.16.2.10
+$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:5555 --proxy-type socks5 %h %p" -i monitor_rsa.pem monitor@172.16.20.10
 
 # DMZ 서버
-$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:5555 --proxy-type socks5 %h %p" -i monitor_rsa.pem monitor@172.16.1.10
+$ ssh -o ProxyCommand="ncat --proxy 127.0.0.1:5555 --proxy-type socks5 %h %p" -i monitor_rsa.pem monitor@172.16.10.10
 ```
 
 > **공격 성공!** 모니터링 솔루션 계정(`monitor`)으로 전체 내부 인프라 장악 완료
